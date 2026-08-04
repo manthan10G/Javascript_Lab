@@ -1,0 +1,117 @@
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ATM PIN Verification (Palindrome Check)</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f5f7ff;margin:24px;color:#0f172a}
+    .card{max-width:520px;margin:auto;background:#fff;border:1px solid #e6e8ff;border-radius:14px;padding:16px}
+    h2{margin:0 0 10px;font-size:18px}
+    label{display:block;margin:10px 0 6px;font-size:13px;color:#334155}
+    input{width:100%;padding:10px;border-radius:10px;border:1px solid #d9dcef;outline:none}
+    input:focus{border-color:#3b6cff;box-shadow:0 0 0 3px rgba(59,108,255,.15)}
+    button{margin-top:12px;width:100%;padding:10px;border:none;border-radius:10px;background:#3b6cff;color:#fff;font-weight:700;cursor:pointer}
+    button:active{transform:translateY(1px)}
+    .out{margin-top:12px;padding:12px;border-radius:10px;background:#0f172a;color:#e5e7eb}
+    .msg{font-weight:800;font-size:20px;margin:0}
+    .small{margin-top:6px;font-size:12px;color:#a9b6d3;line-height:1.4}
+    .err{color:#ef4444;margin-top:8px;font-size:13px;min-height:18px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>ATM PIN Verification (Palindrome)</h2>
+
+    <label for="pin">Enter PIN (digits only)</label>
+    <input id="pin" type="password" inputmode="numeric" placeholder="e.g., 1221" maxlength="12" />
+
+    <div class="err" id="err"></div>
+    <button id="verifyBtn" type="button">Verify PIN</button>
+
+    <div class="out" aria-live="polite">
+      <p class="msg" id="result">—</p>
+      <div class="small" id="details"></div>
+    </div>
+  </div>
+
+  <script>
+    // Function types: declaration, expression, arrow (demo)
+    function isPalindromeNumberString(s) { // function declaration
+      let left = 0;
+      let right = s.length - 1;
+
+      while (left < right) {
+        if (s[left] !== s[right]) return false;
+        left++;
+        right--;
+      }
+      return true;
+    }
+
+    const isDigitsOnly = function (s) { // function expression
+      return /^\d+$/.test(s);
+    };
+
+    const show = (ok, forward, backward) => { // arrow function
+      const resultEl = document.getElementById("result");
+      const detailsEl = document.getElementById("details");
+
+      if (ok) {
+        resultEl.textContent = "ACCESS GRANTED ✅";
+        detailsEl.textContent = `PIN reads the same forward and backward (${forward} === ${backward}).`;
+      } else {
+        resultEl.textContent = "ACCESS DENIED ❌";
+        detailsEl.textContent = `Forward: ${forward}, Backward: ${backward}.`;
+      }
+    };
+
+    // Scope + closure example:
+    // The checker remembers attempt count (closure).
+    function createPinVerifier() {
+      let attempts = 0;
+
+      return function verify() {
+        attempts++;
+
+        const errEl = document.getElementById("err");
+        errEl.textContent = "";
+
+        const pinEl = document.getElementById("pin");
+        const pin = pinEl.value.trim();
+
+        try {
+          // try/catch for form validation + unexpected errors
+          if (!pin) throw new Error("PIN cannot be empty.");
+          if (pin.length < 4) throw new Error("PIN should be at least 4 digits.");
+          if (pin.length > 12) throw new Error("PIN is too long for this demo.");
+          if (!isDigitsOnly(pin)) throw new Error("PIN must contain digits only.");
+
+          const forward = pin;
+          const backward = pin.split("").reverse().join("");
+
+          const ok = isPalindromeNumberString(pin);
+          show(ok, forward, backward);
+
+          console.log(`PIN verification attempt #${attempts}: ok=${ok}`);
+        } catch (e) {
+          document.getElementById("result").textContent = "—";
+          document.getElementById("details").textContent = "";
+          errEl.textContent = e.message;
+          console.error(e);
+        }
+      };
+    }
+
+    const verify = createPinVerifier();
+    document.getElementById("verifyBtn").addEventListener("click", verify);
+
+    // Optional: Enter key triggers verification
+    document.getElementById("pin").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") verify();
+    });
+  </script>
+</body>
+</html>
+```
