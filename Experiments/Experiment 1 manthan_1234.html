@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Information</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 400px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        #welcomeMessage {
+            text-align: center;
+            color: green;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>User Information</h1>
+
+    <label>Enter Your Name:</label>
+    <input type="text" id="name" placeholder="Enter your name">
+
+    <label>Enter Your PRN:</label>
+    <input type="text" id="prn" placeholder="Enter your PRN">
+
+    <label>Enter Your Course:</label>
+    <input type="text" id="course" placeholder="Enter your course">
+
+    <!-- Inline JavaScript -->
+    <button onclick="showInformation()">
+        Submit Information
+    </button>
+
+    <p id="welcomeMessage"></p>
+
+</div>
+
+<!-- Internal JavaScript -->
+<script>
+
+    function showInformation() {
+
+        let name = document.getElementById("name").value;
+        let prn = document.getElementById("prn").value;
+        let course = document.getElementById("course").value;
+
+        document.getElementById("welcomeMessage").innerHTML =
+        "Welcome, " + name + "!<br>" +
+        "PRN: " + prn + "<br>" +
+        "Course: " + course;
+
+        console.log("Name:", name);
+        console.log("PRN:", prn);
+        console.log("Course:", course);
+
+        console.warn("User information submitted successfully.");
+    }
+
+</script>
+
+</body>
+</html>
