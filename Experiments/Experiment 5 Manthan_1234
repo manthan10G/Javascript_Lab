@@ -1,0 +1,307 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cart Total Calculator (₹)</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; background:#f6f7fb; margin:0; padding:24px; }
+    .wrap { max-width: 980px; margin: 0 auto; background:#fff; padding:18px; border-radius:14px; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+    h1 { margin: 0 0 14px; font-size: 20px; }
+    .grid { display:grid; grid-template-columns: 1.45fr .85fr; gap:16px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .cart-item { display:grid; grid-template-columns: 1fr auto; gap:10px; padding:12px; border:1px solid #e8e9f0; border-radius:12px; margin-bottom:10px; }
+    .meta { display:flex; flex-direction:column; gap:6px; }
+    .name { font-weight:600; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    label { font-size: 12px; color:#555; }
+    input, button, select {
+      padding:8px 10px; border-radius:10px; border:1px solid #dde0ea; background:#fff; font-size: 14px;
+    }
+    input[type="number"]{ width: 130px; }
+    .btns { display:flex; gap:10px; align-items:center; justify-content:flex-end; }
+    button { cursor:pointer; }
+    button.danger { background:#ffecec; border-color:#ffd2d2; }
+    button.primary { background:#0b5fff; border-color:#0b5fff; color:#fff; }
+    button.secondary { background:#f2f5ff; border-color:#d7ddf3; color:#0b5fff; }
+
+    .panel { border:1px solid #e8e9f0; border-radius:14px; padding:14px; background: linear-gradient(180deg, #ffffff, #fbfbff); }
+    .panel h2 { margin:0 0 10px; font-size: 16px; }
+
+    .totals { display:flex; flex-direction:column; gap:10px; }
+    .line { display:flex; justify-content:space-between; gap:12px; }
+    .grand { font-size: 18px; font-weight: 800; }
+
+    .hint { font-size:12px; color:#666; line-height:1.35; margin-top:10px; }
+    .pill { display:inline-flex; padding:4px 10px; border-radius:999px; border:1px solid #dde0ea; background:#fff; font-size:12px; }
+    .summary-badges { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+
+    .dividerish { height:1px; background:#eef0f6; margin:12px 0; }
+
+    .form-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Cart Total Calculator (₹) - User Input Items</h1>
+
+    <div class="grid">
+      <section aria-label="Cart editor">
+        <div id="cart"></div>
+
+        <div class="panel" style="margin-top:14px;">
+          <h2 style="margin-bottom:8px;">Add Item (User Input)</h2>
+          <div class="form-grid">
+            <div>
+              <label>Item Name</label><br/>
+              <input id="itemName" type="text" placeholder="e.g. Headphones" />
+            </div>
+
+            <div>
+              <label>Unit Price (₹)</label><br/>
+              <input id="itemPrice" type="number" min="0" step="0.01" placeholder="e.g. 999.50" />
+            </div>
+
+            <div>
+              <label>Quantity</label><br/>
+              <input id="itemQty" type="number" min="0" step="1" value="1" />
+            </div>
+
+            <div style="display:flex; align-items:flex-end; gap:10px;">
+              <button class="primary" id="addItemBtn" type="button" style="width:100%;">Add to Cart</button>
+            </div>
+          </div>
+          <div class="hint">Tip: Quantity 0 karoge to item add nahi hoga.</div>
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="Totals panel">
+        <h2>Totals</h2>
+
+        <div class="totals">
+          <div class="line">
+            <span>Subtotal</span>
+            <span id="subtotal">₹0.00</span>
+          </div>
+
+          <div class="line">
+            <span>
+              Discount
+              <div class="summary-badges">
+                <span class="pill" id="discountLabel">No discount</span>
+              </div>
+            </span>
+            <span id="discountAmount">-₹0.00</span>
+          </div>
+
+          <div class="line">
+            <span>Tax <small>(optional)</small></span>
+            <span id="taxAmount">₹0.00</span>
+          </div>
+
+          <div class="line grand">
+            <span>Total</span>
+            <span id="grandTotal">₹0.00</span>
+          </div>
+        </div>
+
+        <div class="dividerish"></div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div>
+            <label>Discount % (user input, any value)</label><br/>
+            <input type="number" id="percentRate" min="0" step="0.5" value="10" />
+          </div>
+
+          <div>
+            <label>Apply only if subtotal ≥ threshold (₹)</label><br/>
+            <input type="number" id="threshold" min="0" step="1" value="0" />
+            <div class="hint">Threshold 0 rakhoge to discount hamesha apply hoga.</div>
+          </div>
+
+          <div>
+            <label>Tax rate %</label><br/>
+            <input type="number" id="taxRate" min="0" max="30" step="0.1" value="0" />
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const moneyINR = (n) =>
+      new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(n);
+
+    const toNumber = (v, fallback = 0) => {
+      const x = Number(v);
+      return Number.isFinite(x) ? x : fallback;
+    };
+
+    let cart = [
+      { id: "sku-1", name: "Basic T-Shirt", price: 1800, qty: 1 },
+      { id: "sku-2", name: "Coffee Mug", price: 650, qty: 2 }
+    ];
+
+    function percentDiscount(subtotal, ratePct, threshold) {
+      const safeRate = Math.min(100, Math.max(0, ratePct));   // clamp 0..100
+      const safeThreshold = Math.max(0, threshold);
+
+      if (subtotal >= safeThreshold && safeRate > 0) {
+        const raw = subtotal * (safeRate / 100);
+        return Math.min(subtotal, raw); // discount <= subtotal
+      }
+      return 0;
+    }
+
+    function calculateTotals(items, discountRatePct, threshold, taxRatePct) {
+      const subtotal = items.reduce((acc, it) => acc + it.price * it.qty, 0);
+
+      const discountAmount = percentDiscount(subtotal, discountRatePct, threshold);
+
+      const taxable = Math.max(0, subtotal - discountAmount);
+      const taxAmount = taxable * (Math.max(0, taxRatePct) / 100);
+
+      return { subtotal, discountAmount, taxAmount, total: taxable + taxAmount };
+    }
+
+    const cartEl = document.getElementById("cart");
+
+    function renderCart() {
+      if (cart.length === 0) {
+        cartEl.innerHTML = `<div class="hint">Cart empty hai. Left side se items add karo.</div>`;
+        return;
+      }
+
+      cartEl.innerHTML = cart.map((item, index) => `
+        <div class="cart-item" data-index="${index}">
+          <div class="meta">
+            <div class="name">${item.name}</div>
+
+            <div class="row">
+              <div>
+                <label>Unit Price (₹)</label><br/>
+                <input type="number" min="0" step="0.01" value="${item.price}" data-field="price" />
+              </div>
+
+              <div>
+                <label>Quantity</label><br/>
+                <input type="number" min="0" step="1" value="${item.qty}" data-field="qty" />
+              </div>
+            </div>
+
+            <div class="row">
+              <span class="pill">Line: ${moneyINR(item.price * item.qty)}</span>
+            </div>
+          </div>
+
+          <div class="btns">
+            <button class="danger" type="button" data-action="remove">Remove</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderTotals() {
+      const discountRatePct = toNumber(document.getElementById("percentRate").value, 0);
+      const threshold = toNumber(document.getElementById("threshold").value, 0);
+      const taxRatePct = toNumber(document.getElementById("taxRate").value, 0);
+
+      const totals = calculateTotals(cart, discountRatePct, threshold, taxRatePct);
+
+      document.getElementById("subtotal").textContent = moneyINR(totals.subtotal);
+      document.getElementById("discountAmount").textContent = `-${moneyINR(totals.discountAmount)}`;
+      document.getElementById("taxAmount").textContent = moneyINR(totals.taxAmount);
+      document.getElementById("grandTotal").textContent = moneyINR(totals.total);
+
+      const safeRate = Math.min(100, Math.max(0, discountRatePct));
+      document.getElementById("discountLabel").textContent =
+        totals.discountAmount > 0 ? `${safeRate}% off` : "No discount";
+    }
+
+    cartEl.addEventListener("input", (e) => {
+      const itemCard = e.target.closest(".cart-item");
+      if (!itemCard) return;
+
+      const index = toNumber(itemCard.getAttribute("data-index"), -1);
+      if (index < 0 || !cart[index]) return;
+
+      const field = e.target.getAttribute("data-field");
+      const val = toNumber(e.target.value, 0);
+
+      if (field === "price") cart[index] = { ...cart[index], price: Math.max(0, val) };
+      if (field === "qty") cart[index] = { ...cart[index], qty: Math.max(0, Math.floor(val)) };
+
+      // array handling: drop items with qty 0
+      cart = cart.filter(it => it.qty > 0);
+
+      renderCart();
+      renderTotals();
+    });
+
+    cartEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action='remove']");
+      if (!btn) return;
+
+      const itemCard = btn.closest(".cart-item");
+      const index = toNumber(itemCard.getAttribute("data-index"), -1);
+      if (index >= 0) {
+        cart = cart.filter((_, i) => i !== index); // immutability style
+        renderCart();
+        renderTotals();
+      }
+    });
+
+    document.getElementById("addItemBtn").addEventListener("click", () => {
+      const name = (document.getElementById("itemName").value || "").trim();
+      const price = toNumber(document.getElementById("itemPrice").value, 0);
+      const qty = toNumber(document.getElementById("itemQty").value, 1);
+
+      if (!name) {
+        alert("Item name required hai.");
+        return;
+      }
+      if (price <= 0) {
+        alert("Unit price (₹) should be > 0.");
+        return;
+      }
+      if (qty <= 0) {
+        alert("Quantity should be > 0.");
+        return;
+      }
+
+      // If same name exists, add qty (object/array handling)
+      const existingIndex = cart.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
+      if (existingIndex >= 0) {
+        cart = cart.map((it, i) =>
+          i === existingIndex ? { ...it, qty: it.qty + qty } : it
+        );
+      } else {
+        cart = [
+          ...cart,
+          { id: `sku-${Date.now()}`, name, price, qty }
+        ];
+      }
+
+      // clear inputs (optional)
+      document.getElementById("itemName").value = "";
+      document.getElementById("itemPrice").value = "";
+      document.getElementById("itemQty").value = 1;
+
+      renderCart();
+      renderTotals();
+    });
+
+    // Discount/tax inputs
+    ["percentRate", "threshold", "taxRate"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderTotals);
+      document.getElementById(id).addEventListener("change", renderTotals);
+    });
+
+    renderCart();
+    renderTotals();
+  </script>
+</body>
+</html>
