@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Email Validation + Extraction + Text Analysis (JS Regex)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      margin: 0;
+      background: #ffffff; /* CHANGED: white background */
+      color: #000000;      /* keep text readable on white */
+    }
+    .container {
+      max-width: 980px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    h1 { margin-bottom: 16px; font-size: 20px; }
+
+    .card {
+      background: #f6f7fb;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    input, textarea {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #ffffff;
+      color: #000000;
+      outline: none;
+    }
+
+    button {
+      margin-top: 8px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #4f7cff;
+      color: white;
+      font-weight: 700;
+    }
+
+    button:hover { background: #3f6dff; }
+
+    .result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(79,124,255,0.08);
+      border: 1px solid rgba(79,124,255,0.20);
+      white-space: normal;
+      color: #000;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 860px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+    pre {
+      white-space: pre-wrap;
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+    .ok { color: #0a8a3a; }
+    .bad { color: #d1002f; }
+    .small { opacity: 0.85; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Email Validation • Extraction • Text Analysis</h1>
+
+    <section class="card">
+      <h2 style="margin:0 0 10px;">1) Email Validation</h2>
+      <label>
+        Email:
+        <input id="emailInput" type="text" placeholder="name@example.com" />
+      </label>
+      <button id="validateBtn" type="button">Validate Email</button>
+      <div id="emailResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 10px;">2) Data Extraction (from text)</h2>
+      <label>
+        Paste text:
+        <textarea id="textInput" rows="7" placeholder="Paste text that includes emails, phones, URLs..."></textarea>
+      </label>
+      <button id="extractBtn" type="button">Extract Data</button>
+
+      <div id="extractResult" class="result grid2" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 10px;">3) Text Analysis</h2>
+      <button id="analyzeBtn" type="button">Analyze Text</button>
+      <div id="analyzeResult" class="result grid2" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    // ---------- Utility ----------
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    const unique = (arr) => [...new Set(arr)];
+
+    // ---------- 1) Email validation (RegExp + string functions) ----------
+    const emailInput = document.getElementById("emailInput");
+    const validateBtn = document.getElementById("validateBtn");
+    const emailResult = document.getElementById("emailResult");
+
+    function isValidEmail(email) {
+      const e = email.trim();
+
+      // Practical email regex (UI validation)
+      const emailRegex =
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      // Example string functions
+      const hasAt = e.includes("@");
+      const domainPart = e.split("@")[1] || "";
+      const hasDotInDomain = domainPart.includes(".");
+
+      return hasAt && hasDotInDomain && emailRegex.test(e);
+    }
+
+    validateBtn.addEventListener("click", () => {
+      const email = emailInput.value;
+
+      if (!email || email.trim().length === 0) {
+        emailResult.innerHTML = `<span class="bad">Enter an email first.</span>`;
+        return;
+      }
+
+      const ok = isValidEmail(email);
+      emailResult.innerHTML = ok
+        ? `<span class="ok">Valid email ✅</span>`
+        : `<span class="bad">Invalid email ❌</span>`;
+    });
+
+    // ---------- 2) Data extraction (emails, phones, URLs) ----------
+    const textInput = document.getElementById("textInput");
+    const extractBtn = document.getElementById("extractBtn");
+    const extractResult = document.getElementById("extractResult");
+
+    function extractAll(text) {
+      const src = text ?? "";
+
+      const emailRegex = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
+      const phoneRegex = /\b(?:\+?\d{1,3}[\s-]?)?(?:\(\d{2,3}\)|\d{2,3})[\s-]?\d{3}[\s-]?\d{4}\b/g;
+      const urlRegex = /\bhttps?:\/\/[^\s/$.?#].[^\s]*\b/gi;
+
+      const emails = src.match(emailRegex) ?? [];
+      const phones = src.match(phoneRegex) ?? [];
+      const urls = src.match(urlRegex) ?? [];
+
+      return {
+        emails: unique(emails),
+        phones: unique(phones),
+        urls: unique(urls),
+      };
+    }
+
+    extractBtn.addEventListener("click", () => {
+      const text = textInput.value;
+
+      if (!text || text.trim().length === 0) {
+        extractResult.innerHTML = `<div class="bad">Paste some text first.</div>`;
+        return;
+      }
+
+      const data = extractAll(text);
+
+      extractResult.innerHTML = `
+        <div>
+          <div class="small">Emails (${data.emails.length})</div>
+          <pre>${escapeHtml(data.emails.join("\n") || "None found")}</pre>
+        </div>
+        <div>
+          <div class="small">Phones (${data.phones.length})</div>
+          <pre>${escapeHtml(data.phones.join("\n") || "None found")}</pre>
+          <div style="height:10px"></div>
+          <div class="small">URLs (${data.urls.length})</div>
+          <pre>${escapeHtml(data.urls.join("\n") || "None found")}</pre>
+        </div>
+      `;
+    });
+
+    // ---------- 3) Text analysis (regex + string functions) ----------
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const analyzeResult = document.getElementById("analyzeResult");
+
+    function analyzeText(text) {
+      const src = (text ?? "").trim();
+
+      const sentences = src.length === 0
+        ? []
+        : src.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+
+      const words = src.match(/[A-Za-z0-9']+/g) ?? [];
+
+      const lower = words.map(w => w.toLowerCase());
+      const stopWords = new Set([
+        "the","a","an","and","or","but","to","of","in","on","for","with","is","are",
+        "was","were","be","been","it","this","that","as","at","by","from"
+      ]);
+
+      const counts = lower.reduce((acc, w) => {
+        if (!stopWords.has(w)) acc[w] = (acc[w] || 0) + 1;
+        return acc;
+      }, {});
+
+      const topWords = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8);
+
+      return {
+        wordCount: words.length,
+        sentenceCount: sentences.length,
+        characters: src.length,
+        charactersNoSpaces: src.replace(/\s+/g, "").length,
+        topWords
+      };
+    }
+
+    analyzeBtn.addEventListener("click", () => {
+      const text = textInput.value;
+
+      if (!text || text.trim().length === 0) {
+        analyzeResult.innerHTML = `<div class="bad">Paste some text first.</div>`;
+        return;
+      }
+
+      const r = analyzeText(text);
+
+      analyzeResult.innerHTML = `
+        <div>
+          <div class="small">Word count</div>
+          <pre>${r.wordCount}</pre>
+          <div style="height:10px"></div>
+          <div class="small">Sentence count</div>
+          <pre>${r.sentenceCount}</pre>
+        </div>
+
+        <div>
+          <div class="small">Characters (incl. spaces)</div>
+          <pre>${r.characters}</pre>
+          <div style="height:10px"></div>
+          <div class="small">Characters (no spaces)</div>
+          <pre>${r.charactersNoSpaces}</pre>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <div class="small">Top words</div>
+          <pre>${escapeHtml(r.topWords.length
+            ? r.topWords.map(([w,c]) => `${w}: ${c}`).join("\n")
+            : "No words found")}</pre>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
