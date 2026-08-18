@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JavaScript String Operations</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 12px;
+      padding: 18px 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      color: #222;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input[type="text"] , textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d7d7d7;
+      outline: none;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .col {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #0f766e;
+    }
+
+    .btn-secondary:hover {
+      background: #115e59;
+    }
+
+    .output {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f9fafb;
+      border: 1px dashed #cfcfcf;
+      border-radius: 10px;
+      color: #111827;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: #6b7280;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .grid2 { grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>JavaScript String Operations (Reverse & Vowel Count + substring/indexOf/split/replace)</h1>
+      <p class="small">All-in-one HTML + CSS + JavaScript code.</p>
+    </div>
+
+    <!-- STRING BASICS -->
+    <div class="card">
+      <h2>a) Basics of string</h2>
+
+      <div class="row">
+        <div class="col">
+          <label>Enter a string</label>
+          <input type="text" id="basicString" placeholder="e.g., JavaScript" />
+          <div class="hint">Shows length and first/last character using basic string access.</div>
+          <button class="btn-secondary" onclick="showBasics()">Show Basics</button>
+        </div>
+
+        <div class="col">
+          <div class="output" id="basicOutput">
+            Output will appear here...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STRING METHODS -->
+    <div class="card">
+      <h2>b) Work with strings: substring(), indexOf(), split(), replace()</h2>
+
+      <div class="grid2">
+        <div>
+          <label>String</label>
+          <input type="text" id="mainString" placeholder="e.g., Hello World" />
+
+          <label>substring start</label>
+          <input type="text" id="subStart" placeholder="e.g., 0" />
+
+          <label>substring end</label>
+          <input type="text" id="subEnd" placeholder="e.g., 5" />
+        </div>
+
+        <div>
+          <label>indexOf search text</label>
+          <input type="text" id="searchText" placeholder="e.g., World" />
+
+          <label>split separator</label>
+          <input type="text" id="splitSep" placeholder="e.g., space or comma (try: ,)" />
+
+          <label>replace: old value</label>
+          <input type="text" id="replaceOld" placeholder="e.g., Hello" />
+
+          <label>replace: new value</label>
+          <input type="text" id="replaceNew" placeholder="e.g., Hi" />
+        </div>
+      </div>
+
+      <button onclick="runStringMethods()">Run substring / indexOf / split / replace</button>
+
+      <div class="output" id="methodsOutput">
+        Output will appear here...
+      </div>
+      <div class="small">
+        Note: For split, if you type <b>space</b>, it will split on actual spaces.
+      </div>
+    </div>
+
+    <!-- REVERSE STRING -->
+    <div class="card">
+      <h2>1) Write a program to reverse of string</h2>
+
+      <label>Input string to reverse</label>
+      <input type="text" id="reverseInput" placeholder="e.g., hello" />
+
+      <button onclick="reverseIt()">Reverse</button>
+
+      <div class="output" id="reverseOutput">Output will appear here...</div>
+    </div>
+
+    <!-- VOWELS COUNT -->
+    <div class="card">
+      <h2>2) WAP to count the number of vowels in a paragraph</h2>
+
+      <label>Input paragraph</label>
+      <textarea id="vowelInput" placeholder="Type a paragraph here..."></textarea>
+
+      <button class="btn-secondary" onclick="countVowels()">Count Vowels</button>
+
+      <div class="output" id="vowelOutput">Output will appear here...</div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- a) Basics of string ----------
+    function showBasics() {
+      const s = document.getElementById("basicString").value;
+
+      if (!s) {
+        document.getElementById("basicOutput").textContent = "Please enter a string.";
+        return;
+      }
+
+      const len = s.length;
+      const firstChar = s[0];
+      const lastChar = s[len - 1];
+
+      document.getElementById("basicOutput").textContent =
+        "String: " + s + "\n" +
+        "Length: " + len + "\n" +
+        "First character: " + firstChar + "\n" +
+        "Last character: " + lastChar;
+    }
+
+    // ---------- b) substring(), indexOf(), split(), replace() ----------
+    function runStringMethods() {
+      const main = document.getElementById("mainString").value || "";
+      const subStartRaw = document.getElementById("subStart").value;
+      const subEndRaw = document.getElementById("subEnd").value;
+
+      const searchText = document.getElementById("searchText").value || "";
+      const splitSepRaw = document.getElementById("splitSep").value || "";
+      const replaceOld = document.getElementById("replaceOld").value || "";
+      const replaceNew = document.getElementById("replaceNew").value || "";
+
+      const subStart = subStartRaw === "" ? 0 : parseInt(subStartRaw, 10);
+      const subEnd = subEndRaw === "" ? main.length : parseInt(subEndRaw, 10);
+
+      // Handle split separator: allow user to type "space"
+      let splitSep = splitSepRaw;
+      if (splitSepRaw.toLowerCase() === "space") splitSep = " ";
+
+      const substringResult = main.substring(subStart, subEnd);
+      const indexOfResult = searchText === "" ? "N/A (empty search text)" : main.indexOf(searchText);
+      const splitResult = main.split(splitSep);
+      const replaceResult =
+        replaceOld === "" ? "N/A (empty old value for replace)" : main.replace(replaceOld, replaceNew);
+
+      document.getElementById("methodsOutput").textContent =
+        "substring(" + subStart + ", " + subEnd + "):\n" + substringResult + "\n\n" +
+        "indexOf('" + searchText + "'): " + indexOfResult + "\n\n" +
+        "split('" + splitSepRaw + "'):\n[" + splitResult.join(", ") + "]\n\n" +
+        "replace('" + replaceOld + "', '" + replaceNew + "'):\n" + replaceResult;
+    }
+
+    // ---------- 1) Reverse a string ----------
+    function reverseIt() {
+      const str = document.getElementById("reverseInput").value;
+
+      if (str === undefined || str === "") {
+        document.getElementById("reverseOutput").textContent = "Please enter a string.";
+        return;
+      }
+
+      // Loop method
+      let reversed = "";
+      for (let i = str.length - 1; i >= 0; i--) {
+        reversed += str[i];
+      }
+
+      document.getElementById("reverseOutput").textContent =
+        "Original: " + str + "\n" +
+        "Reversed: " + reversed;
+
+      // (Optional) Built-in one-liner:
+      // const reversed2 = str.split("").reverse().join("");
+    }
+
+    // ---------- 2) Count vowels ----------
+    function countVowels() {
+      const paragraph = document.getElementById("vowelInput").value;
+
+      if (!paragraph) {
+        document.getElementById("vowelOutput").textContent = "Please enter a paragraph.";
+        return;
+      }
+
+      const text = paragraph.toLowerCase();
+      const vowels = new Set(["a", "e", "i", "o", "u"]);
+
+      let count = 0;
+      for (const ch of text) {
+        if (vowels.has(ch)) count++;
+      }
+
+      document.getElementById("vowelOutput").textContent =
+        "Paragraph vowel count (a, e, i, o, u): " + count;
+    }
+  </script>
+</body>
+</html>
