@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Application Portal</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #eef2f7;
+      color: #263238;
+      padding: 30px 15px;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .sidebar {
+      background: #172554;
+      color: white;
+      padding: 35px 25px;
+    }
+
+    .sidebar h1 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      color: #facc15;
+    }
+
+    .sidebar p {
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 35px;
+    }
+
+    .steps {
+      list-style: none;
+    }
+
+    .steps li {
+      padding: 15px 12px;
+      margin-bottom: 12px;
+      border-left: 4px solid transparent;
+      color: #cbd5e1;
+      transition: 0.3s;
+    }
+
+    .steps li.active {
+      border-left-color: #facc15;
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .main-content {
+      padding: 35px;
+    }
+
+    .main-content h2 {
+      color: #172554;
+      margin-bottom: 8px;
+    }
+
+    .main-content > p {
+      color: #64748b;
+      margin-bottom: 25px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .progress {
+      width: 33.33%;
+      height: 100%;
+      background: #f59e0b;
+      transition: 0.3s;
+    }
+
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .form-control {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 18px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 7px;
+      color: #334155;
+    }
+
+    input,
+    select,
+    textarea {
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      padding: 12px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    }
+
+    input.valid,
+    select.valid,
+    textarea.valid {
+      border: 2px solid #16a34a;
+    }
+
+    input.invalid,
+    select.invalid,
+    textarea.invalid {
+      border: 2px solid #dc2626;
+    }
+
+    .error {
+      min-height: 17px;
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .skill-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .skill-list label,
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: normal;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .skill-list input,
+    .choice input {
+      width: auto;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    button {
+      border: none;
+      border-radius: 7px;
+      padding: 13px 25px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .next-btn,
+    .submit-btn {
+      background: #172554;
+      color: white;
+      margin-left: auto;
+    }
+
+    .next-btn:hover,
+    .submit-btn:hover {
+      background: #1e40af;
+    }
+
+    .back-btn {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .back-btn:hover {
+      background: #cbd5e1;
+    }
+
+    #successMessage {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .review-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 18px;
+      border-radius: 8px;
+      line-height: 1.9;
+    }
+
+    .review-box strong {
+      color: #172554;
+    }
+
+    @media (max-width: 800px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        padding: 25px;
+      }
+
+      .steps {
+        display: flex;
+        justify-content: space-between;
+        gap: 5px;
+      }
+
+      .steps li {
+        font-size: 13px;
+        padding: 10px 5px;
+        margin: 0;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+      }
+
+      .steps li.active {
+        border-bottom-color: #facc15;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main-content {
+        padding: 22px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wide {
+        grid-column: auto;
+      }
+
+      .skill-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page">
+
+    <aside class="sidebar">
+      <h1>CareerHub</h1>
+
+      <p>
+        Take the next step in your career. Complete your application carefully
+        and our hiring team will contact you.
+      </p>
+
+      <ul class="steps">
+        <li class="active">01 Personal</li>
+        <li>02 Education</li>
+        <li>03 Experience</li>
+        <li>04 Review</li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <h2>Job Application</h2>
+      <p>Please provide accurate information in each section.</p>
+
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <form id="applicationForm" novalidate>
+
+        <!-- STEP 1 -->
+        <section class="form-step active">
+          <h3>Personal Details</h3>
+          <br />
+
+          <div class="form-grid">
+            <div class="form-control">
+              <label for="name">Full Name *</label>
+              <input type="text" id="name" placeholder="Your full name" />
+              <span class="error" id="nameError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="email">Email *</label>
+              <input type="email" id="email" placeholder="you@example.com" />
+              <span class="error" id="emailError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="phone">Phone Number *</label>
+              <input type="tel" id="phone" placeholder="Your phone number" />
+              <span class="error" id="phoneError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="location">Current Location *</label>
+              <input type="text" id="location" placeholder="City and country" />
+              <span class="error" id="locationError"></span>
+            </div>
+
+            <div class="form-control wide">
+              <label for="address">Address *</label>
+              <textarea id="address" rows="3" placeholder="Enter your address"></textarea>
+              <span class="error" id="addressError"></span>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button type="button" class="next-btn">Continue</button>
+          </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="form-step">
+          <h3>Educational Background</h3>
+          <br />
+
+          <div class="form-grid">
+            <div class="form-control">
+              <label for="qualification">Qualification *</label>
+              <select id="qualification">
+                <option value="">Choose qualification</option>
+                <option>High School</option>
+                <option>Diploma</option>
+                <option>Bachelor Degree</option>
+                <option>Master Degree</option>
+                <option>Doctorate</option>
+              </select>
+              <span class="error" id="qualificationError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="major">Field of Study *</label>
+              <input type="text" id="major" placeholder="Computer Science" />
+              <span class="error" id="majorError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="college">College or University *</label>
+              <input type="text" id="college" placeholder="Institution name" />
+              <span class="error" id="collegeError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="year">Graduation Year *</label>
+              <input type="number" id="year" placeholder="2025" />
+              <span class="error" id="yearError"></span>
+            </div>
+
+            <div class="form-control wide">
+              <label for="certificates">Certifications</label>
+              <textarea
+                id="certificates"
+                rows="3"
+                placeholder="List your professional certifications"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button type="button" class="back-btn">Back</button>
+            <button type="button" class="next-btn">Continue</button>
+          </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="form-step">
+          <h3>Professional and Technical Information</h3>
+          <br />
+
+          <div class="form-grid">
+            <div class="form-control">
+              <label for="jobRole">Role Applying For *</label>
+              <select id="jobRole">
+                <option value="">Choose a role</option>
+                <option>Frontend Developer</option>
+                <option>Backend Developer</option>
+                <option>Full Stack Developer</option>
+                <option>UI/UX Designer</option>
+                <option>Data Analyst</option>
+                <option>Digital Marketer</option>
+              </select>
+              <span class="error" id="jobRoleError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="experience">Years of Experience *</label>
+              <input type="number" id="experience" min="0" max="50" />
+              <span class="error" id="experienceError"></span>
+            </div>
+
+            <div class="form-control">
+              <label for="previousCompany">Previous Company</label>
+              <input type="text" id="previousCompany" />
+            </div>
+
+            <div class="form-control">
+              <label for="portfolio">Portfolio URL</label>
+              <input type="url" id="portfolio" placeholder="https://..." />
+              <span class="error" id="portfolioError"></span>
+            </div>
+
+            <div class="form-control wide">
+              <label>Technical Skills: Select at least 3 *</label>
+
+              <div class="skill-list">
+                <label><input type="checkbox" name="skill" value="HTML" /> HTML</label>
+                <label><input type="checkbox" name="skill" value="CSS" /> CSS</label>
+                <label><input type="checkbox" name="skill" value="JavaScript" /> JavaScript</label>
+                <label><input type="checkbox" name="skill" value="Python" /> Python</label>
+                <label><input type="checkbox" name="skill" value="Java" /> Java</label>
+                <label><input type="checkbox" name="skill" value="SQL" /> SQL</label>
+                <label><input type="checkbox" name="skill" value="React" /> React</label>
+                <label><input type="checkbox" name="skill" value="Git" /> Git</label>
+                <label><input type="checkbox" name="skill" value="Node.js" /> Node.js</label>
+              </div>
+
+              <span class="error" id="skillsError"></span>
+            </div>
+
+            <div class="form-control wide">
+              <label for="resume">Upload Resume *</label>
+              <input type="file" id="resume" accept=".pdf,.doc,.docx" />
+              <span class="error" id="resumeError"></span>
+            </div>
+
+            <div class="form-control wide">
+              <label for="message">Why should we hire you? *</label>
+              <textarea
+                id="message"
+                rows="5"
+                placeholder="Write at least 40 characters"
+              ></textarea>
+              <span class="error" id="messageError"></span>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button type="button" class="back-btn">Back</button>
+            <button type="button" class="next-btn">Review Application</button>
+          </div>
+        </section>
+
+        <!-- STEP 4 -->
+        <section class="form-step">
+          <h3>Review Your Application</h3>
+          <br />
+
+          <div class="review-box" id="reviewBox"></div>
+
+          <div class="form-control">
+            <label class="choice">
+              <input type="checkbox" id="agreement" />
+              I confirm that all information is accurate. *
+            </label>
+            <span class="error" id="agreementError"></span>
+          </div>
+
+          <div class="buttons">
+            <button type="button" class="back-btn">Back</button>
+            <button type="submit" class="submit-btn">
+              Submit Application
+            </button>
+          </div>
+        </section>
+
+      </form>
+
+      <p id="successMessage"></p>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById("applicationForm");
+    const steps = document.querySelectorAll(".form-step");
+    const stepItems = document.querySelectorAll(".steps li");
+    const progress = document.getElementById("progress");
+    const successMessage = document.getElementById("successMessage");
+
+    let currentStep = 0;
+
+    const fields = {
+      name: document.getElementById("name"),
+      email: document.getElementById("email"),
+      phone: document.getElementById("phone"),
+      location: document.getElementById("location"),
+      address: document.getElementById("address"),
+      qualification: document.getElementById("qualification"),
+      major: document.getElementById("major"),
+      college: document.getElementById("college"),
+      year: document.getElementById("year"),
+      jobRole: document.getElementById("jobRole"),
+      experience: document.getElementById("experience"),
+      portfolio: document.getElementById("portfolio"),
+      resume: document.getElementById("resume"),
+      message: document.getElementById("message"),
+      agreement: document.getElementById("agreement")
+    };
+
+    function showError(id, message, valid) {
+      const field = fields[id];
+      const error = document.getElementById(id + "Error");
+
+      if (field && field.type !== "checkbox" && field.type !== "file") {
+        field.classList.remove("valid", "invalid");
+        field.classList.add(valid ? "valid" : "invalid");
+      }
+
+      error.textContent = valid ? "✓" : message;
+      error.classList.toggle("success", valid);
+      return valid;
+    }
+
+    function validatePersonal() {
+      let valid = true;
+
+      valid &= showError(
+        "name",
+        "Enter at least 3 characters.",
+        fields.name.value.trim().length >= 3
+      );
+
+      valid &= showError(
+        "email",
+        "Enter a valid email address.",
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.value)
+      );
+
+      valid &= showError(
+        "phone",
+        "Enter a valid phone number.",
+        /^[0-9+\-\s()]{7,20}$/.test(fields.phone.value.trim())
+      );
+
+      valid &= showError(
+        "location",
+        "Enter your location.",
+        fields.location.value.trim().length >= 2
+      );
+
+      valid &= showError(
+        "address",
+        "Address must contain at least 10 characters.",
+        fields.address.value.trim().length >= 10
+      );
+
+      return Boolean(valid);
+    }
+
+    function validateEducation() {
+      let valid = true;
+
+      valid &= showError(
+        "qualification",
+        "Select your qualification.",
+        fields.qualification.value !== ""
+      );
+
+      valid &= showError(
+        "major",
+        "Enter your field of study.",
+        fields.major.value.trim().length >= 2
+      );
+
+      valid &= showError(
+        "college",
+        "Enter your college or university.",
+        fields.college.value.trim().length >= 2
+      );
+
+      valid &= showError(
+        "year",
+        "Enter a valid graduation year.",
+        fields.year.value >= 1950 && fields.year.value <= 2100
+      );
+
+      return Boolean(valid);
+    }
+
+    function validateProfessional() {
+      let valid = true;
+
+      valid &= showError(
+        "jobRole",
+        "Select a job role.",
+        fields.jobRole.value !== ""
+      );
+
+      valid &= showError(
+        "experience",
+        "Enter experience from 0 to 50 years.",
+        fields.experience.value >= 0 &&
+        fields.experience.value <= 50 &&
+        fields.experience.value !== ""
+      );
+
+      const portfolioValid =
+        fields.portfolio.value.trim() === "" ||
+        /^https?:\/\/.+\..+/.test(fields.portfolio.value);
+
+      valid &= showError(
+        "portfolio",
+        "Enter a valid website URL.",
+        portfolioValid
+      );
+
+      const selectedSkills = document.querySelectorAll(
+        'input[name="skill"]:checked'
+      );
+
+      const skillsValid = selectedSkills.length >= 3;
+      const skillsError = document.getElementById("skillsError");
+
+      skillsError.textContent = skillsValid
+        ? "✓"
+        : "Select at least 3 skills.";
+      skillsError.classList.toggle("success", skillsValid);
+
+      valid &= skillsValid;
+
+      const file = fields.resume.files[0];
+      const resumeValid = file &&
+        [".pdf", ".doc", ".docx"].some(extension =>
+          file.name.toLowerCase().endsWith(extension)
+        );
+
+      valid &= showError(
+        "resume",
+        "Upload a PDF, DOC, or DOCX file.",
+        resumeValid
+      );
+
+      const messageValid = fields.message.value.trim().length >= 40;
+
+      valid &= showError(
+        "message",
+        "Write at least 40 characters.",
+        messageValid
+      );
+
+      return Boolean(valid);
+    }
+
+    function validateAgreement() {
+      const valid = fields.agreement.checked;
+      const error = document.getElementById("agreementError");
+
+      error.textContent = valid
+        ? "✓"
+        : "You must confirm the information.";
+      error.classList.toggle("success", valid);
+
+      return valid;
+    }
+
+    function createReview() {
+      const skills = Array.from(
+        document.querySelectorAll('input[name="skill"]:checked')
+      ).map(skill => skill.value);
+
+      document.getElementById("reviewBox").innerHTML = `
+        <p><strong>Name:</strong> ${fields.name.value}</p>
+        <p><strong>Email:</strong> ${fields.email.value}</p>
+        <p><strong>Phone:</strong> ${fields.phone.value}</p>
+        <p><strong>Location:</strong> ${fields.location.value}</p>
+        <p><strong>Qualification:</strong> ${fields.qualification.value}</p>
+        <p><strong>Field of Study:</strong> ${fields.major.value}</p>
+        <p><strong>Institution:</strong> ${fields.college.value}</p>
+        <p><strong>Job Role:</strong> ${fields.jobRole.value}</p>
+        <p><strong>Experience:</strong> ${fields.experience.value} years</p>
+        <p><strong>Technical Skills:</strong> ${skills.join(", ")}</p>
+        <p><strong>Resume:</strong> ${fields.resume.files[0].name}</p>
+      `;
+    }
+
+    function showStep(stepNumber) {
+      steps.forEach((step, index) => {
+        step.classList.toggle("active", index === stepNumber);
+      });
+
+      stepItems.forEach((item, index) => {
+        item.classList.toggle("active", index <= stepNumber);
+      });
+
+      progress.style.width = ((stepNumber + 1) / steps.length) * 100 + "%";
+      currentStep = stepNumber;
+    }
+
+    document.querySelectorAll(".next-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        let valid = true;
+
+        if (currentStep === 0) {
+          valid = validatePersonal();
+        } else if (currentStep === 1) {
+          valid = validateEducation();
+        } else if (currentStep === 2) {
+          valid = validateProfessional();
+          if (valid) createReview();
+        }
+
+        if (valid && currentStep < steps.length - 1) {
+          showStep(currentStep + 1);
+        }
+      });
+    });
+
+    document.querySelectorAll(".back-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        if (currentStep > 0) {
+          showStep(currentStep - 1);
+        }
+      });
+    });
+
+    // Live input validation
+    fields.name.addEventListener("input", validatePersonal);
+    fields.email.addEventListener("input", validatePersonal);
+    fields.phone.addEventListener("input", validatePersonal);
+    fields.location.addEventListener("input", validatePersonal);
+    fields.address.addEventListener("input", validatePersonal);
+
+    fields.major.addEventListener("input", validateEducation);
+    fields.college.addEventListener("input", validateEducation);
+    fields.year.addEventListener("input", validateEducation);
+    fields.qualification.addEventListener("change", validateEducation);
+
+    fields.jobRole.addEventListener("change", validateProfessional);
+    fields.experience.addEventListener("input", validateProfessional);
+    fields.portfolio.addEventListener("input", validateProfessional);
+    fields.resume.addEventListener("change", validateProfessional);
+    fields.message.addEventListener("input", validateProfessional);
+
+    document.querySelectorAll('input[name="skill"]').forEach(skill => {
+      skill.addEventListener("change", validateProfessional);
+    });
+
+    fields.agreement.addEventListener("change", validateAgreement);
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (validateAgreement()) {
+        successMessage.textContent =
+          "Application submitted successfully!";
+        successMessage.style.color = "#16a34a";
+
+        form.reset();
+        showStep(0);
+
+        document.querySelectorAll("input, select, textarea").forEach(field => {
+          field.classList.remove("valid", "invalid");
+        });
+
+        document.querySelectorAll(".error").forEach(error => {
+          error.textContent = "";
+        });
+      } else {
+        successMessage.textContent =
+          "Please confirm your information before submitting.";
+        successMessage.style.color = "#dc2626";
+      }
+    });
+  </script>
+
+</body>
+</html>
