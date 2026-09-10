@@ -1,0 +1,230 @@
+EXPERIMENT 1
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Information</title>
+
+    <style>
+        :root {
+            --background: #f2f4f7;
+            --container: #ffffff;
+            --text: #333333;
+            --input-background: #ffffff;
+            --border: #cccccc;
+            --button: #2563eb;
+            --button-hover: #1d4ed8;
+            --success: #15803d;
+        }
+
+        /* Dark theme variables */
+        body.dark {
+            --background: #111827;
+            --container: #1f2937;
+            --text: #f9fafb;
+            --input-background: #374151;
+            --border: #6b7280;
+            --button: #3b82f6;
+            --button-hover: #60a5fa;
+            --success: #4ade80;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 400px;
+            background-color: var(--container);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        #themeButton {
+            width: auto;
+            padding: 8px 12px;
+            margin: 0;
+            background-color: var(--button);
+            font-size: 14px;
+        }
+
+        #themeButton:hover {
+            background-color: var(--button-hover);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text);
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background-color: var(--input-background);
+            color: var(--text);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        input:focus {
+            border-color: var(--button);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: var(--button);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+        }
+
+        #welcomeMessage {
+            text-align: center;
+            color: var(--success);
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="top-bar">
+            <button id="themeButton" onclick="toggleTheme()">
+                🌙 Dark Theme
+            </button>
+        </div>
+
+        <h1>User Information</h1>
+
+        <label for="name">Enter Your Name:</label>
+        <input
+            type="text"
+            id="name"
+            placeholder="Enter your name"
+        >
+
+        <label for="prn">Enter Your PRN:</label>
+        <input
+            type="text"
+            id="prn"
+            placeholder="Enter your PRN"
+        >
+
+        <label for="course">Enter Your Course:</label>
+        <input
+            type="text"
+            id="course"
+            placeholder="Enter your course"
+        >
+
+        <button onclick="showInformation()">
+            Submit Information
+        </button>
+
+        <p id="welcomeMessage"></p>
+
+    </div>
+
+    <script>
+        function showInformation() {
+            let name = document.getElementById("name").value;
+            let prn = document.getElementById("prn").value;
+            let course = document.getElementById("course").value;
+
+            if (name === "" || prn === "" || course === "") {
+                document.getElementById("welcomeMessage").style.color = "red";
+                document.getElementById("welcomeMessage").innerHTML =
+                    "Please fill in all the fields.";
+                return;
+            }
+
+            document.getElementById("welcomeMessage").style.color =
+                "var(--success)";
+
+            document.getElementById("welcomeMessage").innerHTML =
+                "Welcome, " + name + "!<br>" +
+                "PRN: " + prn + "<br>" +
+                "Course: " + course;
+
+            console.log("Name:", name);
+            console.log("PRN:", prn);
+            console.log("Course:", course);
+            console.warn("User information submitted successfully.");
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+
+            const themeButton = document.getElementById("themeButton");
+
+            if (document.body.classList.contains("dark")) {
+                themeButton.innerHTML = "☀️ Light Theme";
+                localStorage.setItem("theme", "dark");
+            } else {
+                themeButton.innerHTML = "🌙 Dark Theme";
+                localStorage.setItem("theme", "light");
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            const themeButton = document.getElementById("themeButton");
+
+            if (savedTheme === "dark") {
+                document.body.classList.add("dark");
+                themeButton.innerHTML = "☀️ Light Theme";
+            }
+        }
+
+        loadTheme();
+    </script>
+
+</body>
+</html>
