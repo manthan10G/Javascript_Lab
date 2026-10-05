@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Class Scheduler</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: #f4f6fa;
+      color: #19202b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(850px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 60px;
+    }
+
+    .header,
+    .schedule-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+    }
+
+    h2 {
+      margin: 0;
+    }
+
+    .label {
+      margin: 0 0 8px;
+      color: #697386;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    #clock {
+      color: #535f70;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .next-card {
+      margin: 30px 0;
+      padding: clamp(24px, 5vw, 40px);
+      border-radius: 22px;
+      color: white;
+      background: linear-gradient(135deg, #3659dc, #713dd1);
+    }
+
+    .next-card .label,
+    #next-info,
+    #countdown-label {
+      color: rgb(255 255 255 / 78%);
+    }
+
+    #next-name {
+      margin-bottom: 8px;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+    }
+
+    #next-info,
+    #countdown-label {
+      margin-bottom: 0;
+    }
+
+    #countdown {
+      margin: 22px 0 4px;
+      font-size: clamp(2.5rem, 10vw, 4.5rem);
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.05em;
+    }
+
+    .schedule {
+      padding: 26px;
+      border: 1px solid #e5e9f0;
+      border-radius: 18px;
+      background: white;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 9px;
+      color: white;
+      background: #3659dc;
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    button:hover {
+      background: #2948bf;
+    }
+
+    button.secondary {
+      color: #303949;
+      background: #edf0f5;
+    }
+
+    #class-form {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+      padding: 18px;
+      border-radius: 12px;
+      background: #f5f7fb;
+    }
+
+    #class-form label {
+      display: grid;
+      gap: 7px;
+      color: #535f70;
+      font-size: 0.9rem;
+    }
+
+    #class-form input {
+      width: 100%;
+      min-width: 0;
+      padding: 10px;
+      border: 1px solid #d9dfeb;
+      border-radius: 8px;
+    }
+
+    .form-buttons {
+      display: flex;
+      align-items: end;
+      gap: 8px;
+    }
+
+    #class-list {
+      display: grid;
+      gap: 10px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .class-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px;
+      border: 1px solid #e8ebf1;
+      border-radius: 11px;
+    }
+
+    .class-item.is-next {
+      border-color: #8398f4;
+      background: #f6f7ff;
+    }
+
+    .class-name {
+      margin: 0 0 4px;
+      font-weight: 700;
+    }
+
+    .class-location {
+      margin: 0;
+      color: #697386;
+      font-size: 0.9rem;
+    }
+
+    .class-time {
+      flex: 0 0 auto;
+      font-weight: 700;
+    }
+
+    .remove-button {
+      margin-left: 8px;
+      padding: 7px 10px;
+      color: #a22f3c;
+      background: #fff0f1;
+    }
+
+    .remove-button:hover {
+      background: #ffe0e3;
+    }
+
+    #empty-message {
+      margin: 20px 0 0;
+      color: #697386;
+    }
+
+    @media (max-width: 650px) {
+      .schedule {
+        padding: 20px 16px;
+      }
+
+      #class-form {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .header,
+      .schedule-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .class-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="header">
+      <div>
+        <p class="label">YOUR DAILY PLAN</p>
+        <h1>Class scheduler</h1>
+      </div>
+      <time id="clock"></time>
+    </header>
+
+    <section class="next-card">
+      <p class="label">UP NEXT</p>
+      <h2 id="next-name">Loading schedule…</h2>
+      <p id="next-info"></p>
+      <div id="countdown" aria-live="polite">--:--:--</div>
+      <p id="countdown-label">until your next class</p>
+    </section>
+
+    <section class="schedule">
+      <div class="schedule-header">
+        <h2>Today’s classes</h2>
+        <button id="show-form" type="button">＋ Add class</button>
+      </div>
+
+      <form id="class-form" hidden>
+        <label>
+          Class name
+          <input name="name" required maxlength="50" placeholder="e.g. Biology">
+        </label>
+
+        <label>
+          Start time
+          <input name="time" type="time" required>
+        </label>
+
+        <label>
+          Room or location
+          <input name="location" maxlength="50" placeholder="e.g. Room 204">
+        </label>
+
+        <div class="form-buttons">
+          <button type="submit">Save class</button>
+          <button id="cancel-form" class="secondary" type="button">Cancel</button>
+        </div>
+      </form>
+
+      <ul id="class-list"></ul>
+      <p id="empty-message" hidden>No classes yet. Add one to get started.</p>
+    </section>
+  </main>
+
+  <script type="module">
+    /*
+      This single-file version uses inline module JavaScript.
+      For separate ES6 modules, move these functions into scheduler.js
+      and import them into app.js.
+    */
+
+    const STORAGE_KEY = "class-scheduler-classes";
+
+    const sampleClasses = [
+      { id: "math", name: "Mathematics", time: "09:00", location: "Room 204" },
+      { id: "biology", name: "Biology", time: "11:30", location: "Science Lab" },
+      { id: "history", name: "History", time: "14:00", location: "Room 108" }
+    ];
+
+    function loadClasses() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : sampleClasses;
+      } catch {
+        return sampleClasses;
+      }
+    }
+
+    function saveClasses(classes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(classes));
+    }
+
+    function getNextClass(classes, now = new Date()) {
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      return [...classes]
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .find((item) => {
+          const [hours, minutes] = item.time.split(":").map(Number);
+          return hours * 60 + minutes > currentMinutes;
+        }) ?? null;
+    }
+
+    function getStartDate(time, now = new Date()) {
+      const [hours, minutes] = time.split(":").map(Number);
+      const date = new Date(now);
+      date.setHours(hours, minutes, 0, 0);
+      return date;
+    }
+
+    function formatTime(time) {
+      const [hours, minutes] = time.split(":").map(Number);
+
+      return new Intl.DateTimeFormat(undefined, {
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(new Date(2000, 0, 1, hours, minutes));
+    }
+
+    const clock = document.querySelector("#clock");
+    const nextName = document.querySelector("#next-name");
+    const nextInfo = document.querySelector("#next-info");
+    const countdown = document.querySelector("#countdown");
+    const countdownLabel = document.querySelector("#countdown-label");
+    const classList = document.querySelector("#class-list");
+    const emptyMessage = document.querySelector("#empty-message");
+    const form = document.querySelector("#class-form");
+
+    let classes = loadClasses();
+    let startTimeout;
+
+    function formatCountdown(milliseconds) {
+      const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      return [hours, minutes, seconds]
+        .map((number) => String(number).padStart(2, "0"))
+        .join(":");
+    }
+
+    function renderClasses(nextClass) {
+      classList.replaceChildren();
+      emptyMessage.hidden = classes.length > 0;
+
+      [...classes]
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .forEach((item) => {
+          const li = document.createElement("li");
+          li.className = "class-item";
+
+          if (nextClass?.id === item.id) {
+            li.classList.add("is-next");
+          }
+
+          const info = document.createElement("div");
+          const name = document.createElement("p");
+          const location = document.createElement("p");
+          const time = document.createElement("span");
+          const removeButton = document.createElement("button");
+
+          name.className = "class-name";
+          name.textContent = item.name;
+
+          location.className = "class-location";
+          location.textContent = item.location || "Location not specified";
+
+          time.className = "class-time";
+          time.textContent = formatTime(item.time);
+
+          removeButton.className = "remove-button";
+          removeButton.type = "button";
+          removeButton.textContent = "Remove";
+          removeButton.setAttribute("aria-label", `Remove ${item.name}`);
+
+          removeButton.addEventListener("click", () => {
+            classes = classes.filter((classItem) => classItem.id !== item.id);
+            saveClasses(classes);
+            update();
+          });
+
+          info.append(name, location);
+          li.append(info, time, removeButton);
+          classList.append(li);
+        });
+    }
+
+    function update() {
+      const now = new Date();
+
+      clock.textContent = new Intl.DateTimeFormat(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit"
+      }).format(now);
+
+      const nextClass = getNextClass(classes, now);
+      renderClasses(nextClass);
+
+      if (!nextClass) {
+        nextName.textContent = classes.length
+          ? "No more classes today"
+          : "No classes scheduled";
+
+        nextInfo.textContent = classes.length
+          ? "Your next class will be tomorrow."
+          : "Add a class to get started.";
+
+        countdown.textContent = "--:--:--";
+        countdownLabel.textContent = "until your next class";
+        clearTimeout(startTimeout);
+        return;
+      }
+
+      nextName.textContent = nextClass.name;
+      nextInfo.textContent =
+        `${formatTime(nextClass.time)} · ${nextClass.location || "Location not specified"}`;
+
+      const startDate = getStartDate(nextClass.time, now);
+      countdown.textContent = formatCountdown(startDate - now);
+      countdownLabel.textContent = `until ${nextClass.name} starts`;
+
+      // Refresh the schedule when the upcoming class starts.
+      clearTimeout(startTimeout);
+      startTimeout = setTimeout(update, Math.max(0, startDate - now + 100));
+    }
+
+    document.querySelector("#show-form").addEventListener("click", () => {
+      form.hidden = !form.hidden;
+      if (!form.hidden) form.elements.name.focus();
+    });
+
+    document.querySelector("#cancel-form").addEventListener("click", () => {
+      form.reset();
+      form.hidden = true;
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const newClass = {
+        id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()),
+        name: String(data.get("name")).trim(),
+        time: String(data.get("time")),
+        location: String(data.get("location")).trim()
+      };
+
+      if (!newClass.name || !newClass.time) return;
+
+      classes.push(newClass);
+      saveClasses(classes);
+      form.reset();
+      form.hidden = true;
+      update();
+    });
+
+    // Update the clock and countdown every second.
+    setInterval(update, 1000);
+    update();
+  </script>
+</body>
+</html>
