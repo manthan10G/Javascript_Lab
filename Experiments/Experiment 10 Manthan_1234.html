@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Data Table Loader</title>
+    
+    <!-- Include jQuery Library -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #555;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #fdfdfd;
+        }
+
+        .loading {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>User Data Loader</h2>
+        <div class="controls">
+            <button id="btn-fetch">Load with fetch()</button>
+            <button id="btn-jquery">Load with $.getJSON()</button>
+        </div>
+        <div id="table-container">
+            <p class="loading">Click a button to load data...</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://jsonplaceholder.typicode.com/users';
+        const container = document.getElementById('table-container');
+
+        /**
+         * Renders an array of objects into a dynamic HTML table
+         */
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p>No data found.</p>';
+                return;
+            }
+
+            // We filter out 'address' and 'company' because they are nested objects
+            // which would just display as "[object Object]" in a table cell.
+            const keys = Object.keys(data[0]).filter(key => 
+                typeof data[0][key] !== 'object'
+            );
+            
+            let html = '<table><thead><tr>';
+            
+            // Create Table Headers
+            keys.forEach(key => {
+                html += `<th>${key}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            // Create Table Rows
+            data.forEach(item => {
+                html += '<tr>';
+                keys.forEach(key => {
+                    html += `<td>${item[key]}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // --- METHOD 1: Modern JavaScript fetch() ---
+        document.getElementById('btn-fetch').addEventListener('click', () => {
+            container.innerHTML = '<p class="loading">Loading via fetch()...</p>';
+            
+            fetch(API_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => renderTable(data))
+                .catch(error => {
+                    container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+                });
+        });
+
+        // --- METHOD 2: jQuery $.getJSON() ---
+        document.getElementById('btn-jquery').addEventListener('click', () => {
+            container.innerHTML = '<p class="loading">Loading via jQuery...</p>';
+
+            $.getJSON(API_URL, (data) => {
+                renderTable(data);
+            }).fail((xhr, status, error) => {
+                container.innerHTML = `<p style="color:red">Error: ${error}</p>`;
+            });
+        });
+    </script>
+</body>
+</html>
